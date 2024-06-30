@@ -1,10 +1,15 @@
 Import("env")
 
 import subprocess
+import os
 
-version = subprocess.check_output("tail -n1 'src/OC_version.h'|tr -d '\"'", shell=True).decode().strip()
-# git_rev = subprocess.check_output("git rev-parse --short HEAD", shell=True).decode().strip()
-git_rev = subprocess.check_output("sh res/oc_build_tag.sh", shell=True).decode().strip()
+if os.name == 'nt':
+    version = subprocess.check_output(["powershell.exe", "Get-Content .\src\OC_version.h | Select-Object -Index 1 | %{ $_ -replace '\"', ''}"], shell=True)
+    git_rev = subprocess.check_output("git rev-parse --short HEAD", shell=True).decode().strip()
+else:
+    version = subprocess.check_output("tail -n1 'src/OC_version.h'|tr -d '\"'", shell=True).decode().strip()
+    git_rev = subprocess.check_output("sh res/oc_build_tag.sh", shell=True).decode().strip()
+
 extras = ""
 env.Append(BUILD_FLAGS=[ f'-DOC_BUILD_TAG=\\"{git_rev}\\"' ])
 
